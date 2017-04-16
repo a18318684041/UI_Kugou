@@ -2,6 +2,7 @@ package com.example.administrator.ui_kugou.numberKeyboard;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -9,16 +10,22 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 import com.example.administrator.ui_kugou.R;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Created by Administrator on 2017/4/14 0014.
  */
 
 public class MyView  extends View{
+    List<Integer> arr= new ArrayList<>();//装载随机键盘数字的动态数组
     private Paint mPaint;
     private Bitmap mBpDelete;
     private float clickX, clickY;   //点击时的x,y坐标
@@ -113,13 +120,15 @@ public class MyView  extends View{
     }
 
     private void initData() {
-        mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);//是使位图抗锯齿的标志
         mWidth = getWidth();
         mHeight = getHeight();
+        //获取删除图片的资源
         mBpDelete = BitmapFactory.decodeResource(getResources(), R.mipmap.keyboard_backspace);
         mWidthOfBp = mBpDelete.getWidth();
         mHeightOfBp = mBpDelete.getHeight();
-
+        Log.d("AAA", ":宽度："+mWidth+" 高度:"+mHeight);
+        Log.d("AAA", ":图片的宽度："+mWidthOfBp+" 高度:"+mHeightOfBp);
         mRectWidth = (mWidth - 40) / 3;   //每个按键左右间距10
         mRectHeight = (mHeight - 100) / 8;//每个按键上下间距10
 
@@ -164,21 +173,30 @@ public class MyView  extends View{
         mPaint.setTextSize(60);// 设置字体大小
         mPaint.setStrokeWidth(2);
         //画数字
+
+        //生成随机键盘，首先生成键盘数字的动态数字
+        while (arr.size()!=10){
+            int r = new Random().nextInt(10);
+            if(!arr.contains(r)){
+                arr.add(r);
+            }
+        }
         //第一排
-        canvas.drawText("1", xs[0], ys[0], mPaint);
-        canvas.drawText("2", xs[1], ys[0], mPaint);
-        canvas.drawText("3", xs[2], ys[0], mPaint);
+        canvas.drawText(String.valueOf(arr.get(0)), xs[0], ys[0], mPaint);
+        canvas.drawText(String.valueOf(arr.get(1)), xs[1], ys[0], mPaint);
+        canvas.drawText(String.valueOf(arr.get(2)), xs[2], ys[0], mPaint);
         //第二排
-        canvas.drawText("4", xs[0], ys[1], mPaint);
-        canvas.drawText("5", xs[1], ys[1], mPaint);
-        canvas.drawText("6", xs[2], ys[1], mPaint);
+        canvas.drawText(String.valueOf(arr.get(3)), xs[0], ys[1], mPaint);
+        canvas.drawText(String.valueOf(arr.get(4)), xs[1], ys[1], mPaint);
+        canvas.drawText(String.valueOf(arr.get(5)), xs[2], ys[1], mPaint);
         //第三排
-        canvas.drawText("7", xs[0], ys[2], mPaint);
-        canvas.drawText("8", xs[1], ys[2], mPaint);
-        canvas.drawText("9", xs[2], ys[2], mPaint);
+        canvas.drawText(String.valueOf(arr.get(6)), xs[0], ys[2], mPaint);
+        canvas.drawText(String.valueOf(arr.get(7)), xs[1], ys[2], mPaint);
+        canvas.drawText(String.valueOf(arr.get(8)), xs[2], ys[2], mPaint);
+
         //第四排
         canvas.drawText(".", xs[0], ys[3], mPaint);
-        canvas.drawText("0", xs[1], ys[3], mPaint);
+        canvas.drawText(String.valueOf(arr.get(9)), xs[1], ys[3], mPaint);
         canvas.drawBitmap(mBpDelete, xs[2] - mWidthOfBp / 2 + 10, ys[3] - mHeightOfBp / 2 - 10, mPaint);
     }
 
@@ -189,6 +207,7 @@ public class MyView  extends View{
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN: //按下
                 setDefault();
+                //处理触摸的纵横坐标
                 handleDown(x, y);
                 return true;
             case MotionEvent.ACTION_UP: //弹起
@@ -223,9 +242,11 @@ public class MyView  extends View{
     }
 
     private void handleDown(float x, float y) {
+        //如果点击的纵坐标在屏幕的上半部分则当做无效触摸
         if (y < mHeight / 2) {
             return;
         }
+        //屏幕的下班部分的触摸事件
         if (x >= 10 && x <= 10 + mRectWidth) {   //第一列
             clickX = xs[0];
             if (y >= mHeight / 2 + 10 && y <= mHeight / 2 + 10 + mRectHeight) {  //第一排(1)
@@ -234,28 +255,28 @@ public class MyView  extends View{
                 y1 = mHeight / 2 + 10;
                 x2 = 10 + mRectWidth;
                 y2 = mHeight / 2 + 10 + mRectHeight;
-                number = "1";
+                number = String.valueOf(arr.get(0));
             } else if (y >= mHeight / 2 + 20 + mRectHeight && y <= mHeight / 2 + 20 + 2 * mRectHeight) {  //第二排(4)
                 x1 = 10;
                 y1 = mHeight / 2 + 20 + mRectHeight;
                 x2 = 10 + mRectWidth;
                 y2 = mHeight / 2 + 20 + 2 * mRectHeight;
                 clickY = ys[1];
-                number = "4";
+                number = String.valueOf(arr.get(3));
             } else if (y >= mHeight / 2 + 30 + 2 * mRectHeight && y <= mHeight / 2 + 30 + 3 * mRectHeight) {  //第三排(7)
                 x1 = 10;
                 y1 = mHeight / 2 + 30 + 2 * mRectHeight;
                 x2 = 10 + mRectWidth;
                 y2 = mHeight / 2 + 30 + 3 * mRectHeight;
                 clickY = ys[2];
-                number = "7";
+                number = String.valueOf(arr.get(6));
             } else if (y >= mHeight / 2 + 40 + 3 * mRectHeight && y <= mHeight / 2 + 40 + 4 * mRectHeight) { //第四排(0)
                 x1 = 10;
                 y1 = mHeight / 2 + 40 + 3 * mRectHeight;
                 x2 = 10 + mRectWidth;
                 y2 = mHeight / 2 + 40 + 4 * mRectHeight;
                 clickY = ys[3];
-                number = ".";
+                number = String.valueOf(arr.get(9));
             }
         } else if (x >= 20 + mRectWidth && x <= 20 + 2 * mRectWidth) {  //第二列
             clickX = xs[1];
@@ -265,28 +286,28 @@ public class MyView  extends View{
                 x2 = 20 + 2 * mRectWidth;
                 y2 = mHeight / 2 + 10 + mRectHeight;
                 clickY = ys[0];
-                number = "2";
+                number = String.valueOf(arr.get(1));
             } else if (y >= mHeight / 2 + 20 + mRectHeight && y <= mHeight / 2 + 20 + 2 * mRectHeight) {  //第二排(5)
                 x1 = 20 + mRectWidth;
                 y1 = mHeight / 2 + 20 + mRectHeight;
                 x2 = 20 + 2 * mRectWidth;
                 y2 = mHeight / 2 + 20 + 2 * mRectHeight;
                 clickY = ys[1];
-                number = "5";
+                number = String.valueOf(arr.get(4));
             } else if (y >= mHeight / 2 + 30 + 2 * mRectHeight && y <= mHeight / 2 + 30 + 3 * mRectHeight) {  //第三排(8)
                 x1 = 20 + mRectWidth;
                 y1 = mHeight / 2 + 30 + 2 * mRectHeight;
                 x2 = 20 + 2 * mRectWidth;
                 y2 = mHeight / 2 + 30 + 3 * mRectHeight;
                 clickY = ys[2];
-                number = "8";
+                number = String.valueOf(arr.get(7));
             } else if (y >= mHeight / 2 + 40 + 3 * mRectHeight && y <= mHeight / 2 + 40 + 4 * mRectHeight) { //第四排(0)
                 x1 = 20 + mRectWidth;
                 y1 = mHeight / 2 + 40 + 3 * mRectHeight;
                 x2 = 20 + 2 * mRectWidth;
                 y2 = mHeight / 2 + 40 + 4 * mRectHeight;
                 clickY = ys[3];
-                number = "0";
+                number = String.valueOf(arr.get(9));
             }
         } else if (x >= 30 + 2 * mRectWidth && x <= 30 + 3 * mRectWidth) {   //第三列
             clickX = xs[2];
@@ -296,21 +317,21 @@ public class MyView  extends View{
                 x2 = 30 + 3 * mRectWidth;
                 y2 = mHeight / 2 + 10 + mRectHeight;
                 clickY = ys[0];
-                number = "3";
+                number = String.valueOf(arr.get(2));
             } else if (y >= mHeight / 2 + 20 + mRectHeight && y <= mHeight / 2 + 20 + 2 * mRectHeight) {  //第二排(6)
                 x1 = 30 + 2 * mRectWidth;
                 y1 = mHeight / 2 + 20 + mRectHeight;
                 x2 = 30 + 3 * mRectWidth;
                 y2 = mHeight / 2 + 20 + 2 * mRectHeight;
                 clickY = ys[1];
-                number = "6";
+                number = String.valueOf(arr.get(5));
             } else if (y >= mHeight / 2 + 30 + 2 * mRectHeight && y <= mHeight / 2 + 30 + 3 * mRectHeight) {  //第三排(9)
                 x1 = 30 + 2 * mRectWidth;
                 y1 = mHeight / 2 + 30 + 2 * mRectHeight;
                 x2 = 30 + 3 * mRectWidth;
                 y2 = mHeight / 2 + 30 + 3 * mRectHeight;
                 clickY = ys[2];
-                number = "9";
+                number = String.valueOf(arr.get(8));
             } else if (y >= mHeight / 2 + 40 + 3 * mRectHeight && y <= mHeight / 2 + 40 + 4 * mRectHeight) { //第四排(删除键)
                 x1 = 30 + 2 * mRectWidth;
                 y1 = mHeight / 2 + 40 + 3 * mRectHeight;
